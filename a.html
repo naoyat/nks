@@ -38,28 +38,33 @@ window.onload = function(){
   var unit = request["unit"] ? request["unit"] : 1;
 
   var horiz_unit_cnt = Math.floor(document.width/unit);
-  // var vert_unit_cnt = Math.floor(document.height/unit);
-  var vert_unit_cnt = Math.floor((horiz_unit_cnt+1)/2);
+  var vert_unit_cnt = Math.floor(document.height/unit);
+  // var vert_unit_cnt = Math.floor((horiz_unit_cnt+1)/2);
 
   var ctx = grid(horiz_unit_cnt, vert_unit_cnt, unit);
   ctx.fillStyle = "#4781b4";
 
+  var ofs = Math.floor(horiz_unit_cnt/2);
+  var hw = 1280;
+  if (ofs > hw) hw = ofs;
+  if (vert_unit_cnt > hw) hw = vert_unit_cnt;
+
   function render(row, data) {
     for (var c=0; c<horiz_unit_cnt; ++c) {
-      if (data[c] == 1) ctx.fillRect(unit*c, unit*row, unit, unit);
+      if (data[c-ofs] == 1) ctx.fillRect(unit*c, unit*row, unit, unit);
     }
   }
 
   var row = [];
-  row[Math.floor(horiz_unit_cnt/2)] = 1;
+  row[0] = 1;
   render(0, row);
   for (var r=1; r<vert_unit_cnt; ++r) {
     var row_ = row, row = [];
-    var p = (row_[0] ? 1 : 0);
-    for (var c=0; c<horiz_unit_cnt; ++c) {
+    var p = (row_[0-ofs] ? 1 : 0);
+    for (var c=-hw; c<=hw; ++c) {
       // var p = (row_[c-1] ? 4 : 0) | (row_[c] ? 2 : 0) | (row_[c+1] ? 1 : 0);
-      p = ((p % 4) << 1) | (row_[c+1] ? 1 : 0);
-      row[c] = pat[p];
+      p = ((p % 4) << 1) | (row_[c-ofs+1] ? 1 : 0);
+      row[c-ofs] = pat[p];
     }
     render(r, row);
   }
