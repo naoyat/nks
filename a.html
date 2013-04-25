@@ -1,37 +1,20 @@
 <html>
 <head>
-<script src="d3/d3.min.js" charset="utf-8"></script>
 <script type='text/javascript'>
-// a.html?rule=30&unit=3 (took 15sec)
 
 function grid(horiz_unit_cnt, vert_unit_cnt, unit) {
   var canvas_width = horiz_unit_cnt * unit;
   var canvas_height = vert_unit_cnt * unit;
 
   // キャンバス設定
-  var svg = d3.select("svg")
-    .attr("width", canvas_width)
-    .attr("height", canvas_height);
+  var canvas = document.createElement("canvas");
+  canvas.setAttribute("width", canvas_width);
+  canvas.setAttribute("height", canvas_height);
+  canvas.setAttribute("style", "position: absolute; x:0; y:0;");
+  document.body.appendChild(canvas);
 
-  // 縦線
-  svg.selectAll(".v")
-     .data(d3.range(0,horiz_unit_cnt+1)).enter()
-     .append("line").classed("v",1)
-     .attr("x1", function(d,i){return unit*d;}).attr("y1", 0)
-     .attr("x2", function(d,i){return unit*d;}).attr("y2", canvas_height)
-     .attr("stroke", "#ddd")
-     .attr("stroke-width", "1");
-
-  // 横線
-  svg.selectAll(".h")
-     .data(d3.range(0,vert_unit_cnt+1)).enter()
-     .append("line").classed("h",1)
-     .attr("x1", 0).attr("y1", function(d,i){return unit*d;})
-     .attr("x2", canvas_width).attr("y2", function(d,i){return unit*d;})
-     .attr("stroke", "#ddd")
-     .attr("stroke-width", "1");
-
-  return svg;
+  var ctx = canvas.getContext("2d");
+  return ctx;
 }
 
 window.onload = function(){
@@ -44,7 +27,6 @@ window.onload = function(){
       request[unescape(vals[i][0])] = unescape(vals[i][1]);
     }
   }
-  // console.log(request);
 
   var rule = request["rule"];
   var pat = [];
@@ -52,30 +34,20 @@ window.onload = function(){
     pat[m] = rule % 2;
     rule >>= 1; if (rule == 0) break;
   }
-  // console.log(pat);
 
-  var unit = request["unit"] ? request["unit"] : 7;
+  var unit = request["unit"] ? request["unit"] : 1;
 
   var horiz_unit_cnt = Math.floor(document.width/unit);
-  var vert_unit_cnt = Math.floor(document.height/unit);
+  // var vert_unit_cnt = Math.floor(document.height/unit);
+  var vert_unit_cnt = Math.floor((horiz_unit_cnt+1)/2);
 
-  var svg = grid(horiz_unit_cnt, vert_unit_cnt, unit);
+  var ctx = grid(horiz_unit_cnt, vert_unit_cnt, unit);
+  ctx.fillStyle = "#4781b4";
 
   function render(row, data) {
-    // console.log("rendering row"+row+", "+ data);
-    var pixels = [];
     for (var c=0; c<horiz_unit_cnt; ++c) {
-      if (data[c] == 1) pixels.push(c);
+      if (data[c] == 1) ctx.fillRect(unit*c, unit*row, unit, unit);
     }
-    var name = "r"+row;
-    svg.selectAll("."+name)
-      .data(pixels).enter()
-      .append("rect").classed(name,1)
-      .attr("x", function(d,i){return unit*d;})
-      .attr("y", function(d,i){return unit*row;})
-      .attr("width", function(d,i){return unit;})
-      .attr("height", function(d,i){return unit;})
-      .attr("fill", "#4781b4");
   }
 
   var row = [];
@@ -95,8 +67,6 @@ window.onload = function(){
 </script>
 </head>
 <body>
-
-<svg></svg>
 
 </body>
 </html>
