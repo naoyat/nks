@@ -31,8 +31,8 @@ window.onload = function(){
   var rule = request["rule"];
   var pat = [];
   for (var m=0; m<8; ++m) {
-    pat[m] = rule % 2;
-    rule >>= 1; if (rule == 0) break;
+    pat[m] = rule % 3;
+    rule = Math.floor(rule/3); if (rule == 0) break;
   }
 
   var unit = request["unit"] ? request["unit"] : 1;
@@ -42,16 +42,24 @@ window.onload = function(){
   // var vert_unit_cnt = Math.floor((horiz_unit_cnt+1)/2);
 
   var ctx = grid(horiz_unit_cnt, vert_unit_cnt, unit);
-  ctx.fillStyle = "#4781b4";
 
   var ofs = Math.floor(horiz_unit_cnt/2);
-  var hw = 2000;
+  var hw = 1000;
   if (ofs > hw) hw = ofs;
   if (vert_unit_cnt > hw) hw = vert_unit_cnt;
 
   function render(row, data) {
     for (var c=0; c<horiz_unit_cnt; ++c) {
-      if (data[c-ofs] == 1) ctx.fillRect(unit*c, unit*row, unit, unit);
+      switch (data[c-ofs]) {
+      case 1:
+          ctx.fillStyle = "#999";
+          ctx.fillRect(unit*c, unit*row, unit, unit); break;
+      case 2:
+          ctx.fillStyle = "#333";
+          ctx.fillRect(unit*c, unit*row, unit, unit); break;
+      default:
+          break;
+      }
     }
   }
 
@@ -60,11 +68,9 @@ window.onload = function(){
   render(0, row);
   for (var r=1; r<vert_unit_cnt; ++r) {
     var row_ = row, row = [];
-    var p = (row_[0-ofs] ? 1 : 0);
     for (var c=-hw; c<=hw; ++c) {
-      // var p = (row_[c-1] ? 4 : 0) | (row_[c] ? 2 : 0) | (row_[c+1] ? 1 : 0);
-      p = ((p % 4) << 1) | (row_[c-ofs+1] ? 1 : 0);
-      row[c-ofs] = pat[p];
+      var sum = (row_[c-1] ? row_[c-1] : 0) + (row_[c] ? row_[c] : 0) + (row_[c+1] ? row_[c+1] : 0);
+      row[c] = pat[sum];
     }
     render(r, row);
   }
